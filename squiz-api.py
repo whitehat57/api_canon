@@ -202,7 +202,7 @@ def main():
     
     try:
         tester = SquizMatrixTester()
-        tester.flood(target_url, workers=20, duration=120)
+        tester.flood(target_url, workers=30, duration=7200)
     except KeyboardInterrupt:
         print("\n[INFO] Test interrupted by user.")
     except Exception as e:
