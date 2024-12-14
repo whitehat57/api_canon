@@ -22,7 +22,7 @@ class AMPTester:
             "Connection": "keep-alive",
             "Content-Type": "application/json",
             "AMP-Same-Origin": "true",
-            "AMP-Cache-Transform": "google;v="1"'
+            "AMP-Cache-Transform": 'google;v="1"'
         }
         # Endpoint yang umum ada di AMP
         self.endpoints = [
@@ -113,7 +113,7 @@ class AMPTester:
         
         # Tambahkan header khusus AMP
         additional_headers = {
-            "AMP-Cache-Transform": "google;v="1"',
+            "AMP-Cache-Transform": 'google;v="1"',
             "AMP-Same-Origin": "true",
             "Origin": url,
             "Sec-Fetch-Site": "same-origin",
