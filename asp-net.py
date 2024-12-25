@@ -53,7 +53,7 @@ def main():
 
     print("\n[INFO] Memindai endpoint valid...")
     valid_endpoints = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=30) as executor:
         future_to_endpoint = {executor.submit(scan_endpoint, host, ep): ep for ep in COMMON_ENDPOINTS}
         for future in concurrent.futures.as_completed(future_to_endpoint):
             result = future.result()
@@ -69,7 +69,7 @@ def main():
         print(f" - {endpoint}")
 
     print("\n[INFO] Memulai stres tes...")
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=30) as executor:
         for endpoint in valid_endpoints:
             executor.submit(stress_test, host, endpoint, duration, method, payload)
 
