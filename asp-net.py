@@ -12,7 +12,7 @@ COMMON_ENDPOINTS = [
 def scan_endpoint(host, endpoint):
     try:
         url = f"{host}{endpoint}"
-        response = requests.get(url, timeout=5)
+        response = requests.get(url, timeout=3)  # Mengurangi timeout untuk meningkatkan kecepatan
         if response.status_code == 200:
             print(f"[VALID] {url} - {response.status_code}")
             return endpoint
@@ -28,9 +28,9 @@ def stress_test(host, endpoint, duration, method="GET", payload=None):
     while time.time() - start_time < duration:
         try:
             if method == "GET":
-                response = requests.get(url, timeout=5)
+                response = requests.get(url, timeout=3)  # Mengurangi timeout untuk meningkatkan kecepatan
             elif method == "POST":
-                response = requests.post(url, json=payload, timeout=5)
+                response = requests.post(url, json=payload, timeout=3)  # Menggunakan payload untuk POST
             print(f"[{response.status_code}] {url}")
         except requests.RequestException as e:
             print(f"[ERROR] {url} - {e}")
@@ -53,7 +53,7 @@ def main():
 
     print("\n[INFO] Memindai endpoint valid...")
     valid_endpoints = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=30) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=50) as executor:  # Meningkatkan jumlah thread
         future_to_endpoint = {executor.submit(scan_endpoint, host, ep): ep for ep in COMMON_ENDPOINTS}
         for future in concurrent.futures.as_completed(future_to_endpoint):
             result = future.result()
@@ -69,7 +69,7 @@ def main():
         print(f" - {endpoint}")
 
     print("\n[INFO] Memulai stres tes...")
-    with concurrent.futures.ThreadPoolExecutor(max_workers=30) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:  # Meningkatkan jumlah pengguna simultan
         for endpoint in valid_endpoints:
             executor.submit(stress_test, host, endpoint, duration, method, payload)
 
