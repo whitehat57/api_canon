@@ -72,7 +72,8 @@ class BootstrapTester:
                 allow_redirects=True
             )
             return 200 <= response.status_code < 404
-        except:
+        except RequestException as e:
+            print(f"[ERROR] HEAD {full_url}: {e}")
             return False
 
     def discover_valid_endpoints(self, url):
@@ -166,8 +167,14 @@ class BootstrapTester:
             )
             # Implementation for token extraction from response
             # Token usually found in meta tags or form fields
-            return "dummy_token"  # Replace with actual implementation
-        except:
+            # Example: <meta name="csrf-token" content="token_value">
+            # Replace with actual implementation to extract the token
+            # Below is a placeholder example:
+            start = response.text.find('name="csrf-token" content="') + len('name="csrf-token" content="')
+            end = response.text.find('"', start)
+            return response.text[start:end]
+        except RequestException as e:
+            print(f"[ERROR] GET CSRF token from {url}: {e}")
             return None
 
     def flood(self, url, workers=10, duration=60):
@@ -212,4 +219,4 @@ def main():
         print(f"[ERROR] Unexpected error occurred: {e}")
 
 if __name__ == "__main__":
-    main() 
+    main()
