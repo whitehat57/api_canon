@@ -1,6 +1,7 @@
 import time
 import json
 import random
+import requests
 from concurrent.futures import ThreadPoolExecutor
 from requests.exceptions import RequestException
 from urllib3.exceptions import InsecureRequestWarning
